@@ -6,12 +6,15 @@ characters, to ``entry.txt`` inside the output directory. The output
 directory is ``MAKEFUN_OUTPUT_DIR`` when that environment variable is set,
 and ``/output`` otherwise. The output file is written with mode 0644.
 
+The output directory itself is never chmodded or removed: in the grading
+sandbox it is a mount owned by another user, so touching its permissions
+fails. Only the file the program itself creates is chmodded.
+
 Standard library only, no network, fully deterministic: every run writes
 the same bytes.
 """
 
 import os
-import stat
 
 REVIEW = (
     "Gravity never clocks out, never takes a holiday, and still cannot "
@@ -22,7 +25,6 @@ REVIEW = (
 def main() -> None:
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
     os.makedirs(out_dir, exist_ok=True)
-    os.chmod(out_dir, 0o755)
     path = os.path.join(out_dir, "entry.txt")
     data = REVIEW.encode("utf-8")
     with open(path, "wb") as f:
